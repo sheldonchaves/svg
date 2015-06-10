@@ -65,12 +65,11 @@ var minX = 100000;
 var minY = 100000;
 
 function parseAllElements(selection, mX, mY, change){
-	
-	if (mX < this.minX){
+	if (this.minX < mX ){
 		this.minX = mX;
 	}
 
-	if (mY < this.minY){
+	if (this.minY < mY ){
 		this.minY = mY;
 	}
 
@@ -85,125 +84,17 @@ function parseAllElements(selection, mX, mY, change){
 		item = selection.children[i];
 
 		if (item.nodeName === "polyline" || item.nodeName === "polygon") {
-			//
-			for (j = 0; j < item.points.length; j++){
-
-				var point = item.points[j];
-
-				xItem = parseFloat(point.x);
-				yItem = parseFloat(point.y);
-
-				if (xItem < this.minX) {
-					this.minX = xItem;
-				}
-
-				if (yItem < this.minY) {
-					this.minY = yItem;
-				}
-
-				if (change){
-					point.x = point.x - mX;
-					point.y = point.y - mY;
-				}
-			}
-			//
+			parsePolylineOrPolygon (item, mX, mY, change);
 		} else if (item.nodeName === "text") {
-			//
-			var matrix = item.getCTM();
-
-			xItem = matrix["e"];
-			yItem = matrix["f"];
-
-			if (xItem < this.minX) {
-				this.minX = xItem;
-			}
-
-			if (yItem < this.minY) {
-				this.minY = yItem;
-			}
-
-			if (change){
-				item.setAttribute("transform", "matrix("+matrix["a"] + " " +matrix["b"] + " " + matrix["c"] + " " + matrix["d"] + " " + (xItem - mX) + " " + (yItem - mY) + ")");
-			}
-			//
+			parseText (item, mX, mY, change);
 		} else if (item.nodeName === "circle") {
-			//
-			var cxItem = parseFloat(item.getAttribute("cx"));
-			var cyItem = parseFloat(item.getAttribute("cy"));	
-			var rItem = parseFloat(item.getAttribute("r"));
-
-			cxItem = cxItem - (rItem/2);
-			cyItem = cyItem - (rItem/2);
-
-			if (cxItem < this.minX) {
-				this.minX = cxItem;
-			}
-
-			if (cyItem < this.minY) {
-				this.minY = cyItem;
-			}
-
-			if (change){
-				item.setAttribute("cx", parseFloat(item.getAttribute("cx")) - mX);
-				item.setAttribute("cy", parseFloat(item.getAttribute("cy")) - mY);
-			}
-			//
+			parseCircle (item, mX, mY, change);
 		} else if (item.nodeName === "ellipse") {
-			//
-			var cxItem = parseFloat(item.getAttribute("cx"));
-			var cyItem = parseFloat(item.getAttribute("cy"));	
-			var rxItem = parseFloat(item.getAttribute("rx"));
-			var ryItem = parseFloat(item.getAttribute("ry"));
-
-			cxItem = cxItem - (rxItem/2);
-			cyItem = cyItem - (ryItem/2);
-
-			if (cxItem < this.minX) {
-				this.minX = cxItem;
-			}
-
-			if (cyItem < this.minY) {
-				this.minY = cyItem;
-			}
-
-			if (change){
-				item.setAttribute("cx", parseFloat(item.getAttribute("cx")) - mX);
-				item.setAttribute("cy", parseFloat(item.getAttribute("cy")) - mY);
-			}
-			//
+			parseEllipse (item, mX, mY, change);
 		} else if (item.nodeName === "path") {
-			//
-			for (j = 0; j < item.pathSegList.length; j++){
-
-				var point = item.pathSegList[j];
-				var letter = point.pathSegTypeAsLetter
-
-				if (letter === "M" || letter === "L") {
-					if (change){
-						point.x = point.x - mX;
-						point.y = point.y - mY;
-					}
-				}
-			}
-			//
+			parsePath (item, mX, mY, change);
 		} else if (item.nodeName === "rect") {
-			//
-			xItem = parseFloat(item.getAttribute("x"));
-			yItem = parseFloat(item.getAttribute("y"));
-
-			if (xItem < this.minX) {
-				this.minX = xItem;
-			}
-
-			if (yItem < this.minY) {
-				this.minY = yItem;
-			}
-
-			if (change){
-				item.setAttribute("x", parseFloat(item.getAttribute("x")) - mX);
-				item.setAttribute("y", parseFloat(item.getAttribute("y")) - mY);
-			}
-			//
+			parseRect (item, mX, mY, change);
 		} else if (item.nodeName === "g") {
 			parseAllElements(item, minX, minY, change);
 		} else {
@@ -214,14 +105,129 @@ function parseAllElements(selection, mX, mY, change){
 	return {x:minX, y:minY, selection:selection};
 }
 
+function parsePolylineOrPolygon (item, mX, mY, change){
+	for (j = 0; j < item.points.length; j++){
+
+		var point = item.points[j];
+
+		xItem = parseFloat(point.x);
+		yItem = parseFloat(point.y);
+
+		if (xItem < this.minX) {
+			this.minX = xItem;
+		}
+
+		if (yItem < this.minY) {
+			this.minY = yItem;
+		}
+
+		if (change){
+			point.x = point.x - mX;
+			point.y = point.y - mY;
+		}
+	}
+}
+
+function parseText (item, mX, mY, change){
+	var matrix = item.getCTM();
+
+	xItem = matrix["e"];
+	yItem = matrix["f"];
+
+	if (xItem < this.minX) {
+		this.minX = xItem;
+	}
+
+	if (yItem < this.minY) {
+		this.minY = yItem;
+	}
+
+	if (change){
+		item.setAttribute("transform", "matrix("+matrix["a"] + " " +matrix["b"] + " " + matrix["c"] + " " + matrix["d"] + " " + (xItem - mX) + " " + (yItem - mY) + ")");
+	}
+} 
+
+function parseCircle (item, mX, mY, change){
+	var cxItem = parseFloat(item.getAttribute("cx"));
+	var cyItem = parseFloat(item.getAttribute("cy"));	
+	var rItem = parseFloat(item.getAttribute("r"));
+
+	cxItem = cxItem - (rItem/2);
+	cyItem = cyItem - (rItem/2);
+
+	if (cxItem < this.minX) {
+		this.minX = cxItem;
+	}
+
+	if (cyItem < this.minY) {
+		this.minY = cyItem;
+	}
+
+	if (change){
+		item.setAttribute("cx", parseFloat(item.getAttribute("cx")) - mX);
+		item.setAttribute("cy", parseFloat(item.getAttribute("cy")) - mY);
+	}
+}
+
+function parseEllipse (item, mX, mY, change){
+	var cxItem = parseFloat(item.getAttribute("cx"));
+	var cyItem = parseFloat(item.getAttribute("cy"));	
+	var rxItem = parseFloat(item.getAttribute("rx"));
+	var ryItem = parseFloat(item.getAttribute("ry"));
+
+	cxItem = cxItem - (rxItem/2);
+	cyItem = cyItem - (ryItem/2);
+
+	if (cxItem < this.minX) {
+		this.minX = cxItem;
+	}
+
+	if (cyItem < this.minY) {
+		this.minY = cyItem;
+	}
+
+	if (change){
+		item.setAttribute("cx", parseFloat(item.getAttribute("cx")) - mX);
+		item.setAttribute("cy", parseFloat(item.getAttribute("cy")) - mY);
+	}
+}
+
+function parsePath (item, mX, mY, change){
+	for (j = 0; j < item.pathSegList.length; j++){
+
+		var point = item.pathSegList[j];
+		var letter = point.pathSegTypeAsLetter
+
+		if (letter === "M" || letter === "L") {
+			if (change){
+				point.x = point.x - mX;
+				point.y = point.y - mY;
+			}
+		}
+	}
+}
+
+function parseRect (item, mX, mY, change){
+	xItem = parseFloat(item.getAttribute("x"));
+	yItem = parseFloat(item.getAttribute("y"));
+
+	if (xItem < this.minX) {
+		this.minX = xItem;
+	}
+
+	if (yItem < this.minY) {
+		this.minY = yItem;
+	}
+
+	if (change){
+		item.setAttribute("x", parseFloat(item.getAttribute("x")) - mX);
+		item.setAttribute("y", parseFloat(item.getAttribute("y")) - mY);
+	}
+}
+
 function otimizeSVG(selection){
 
-	console.log("innerHTML: " + selection);
-
-	testeSVG = selection;	
-
-	var pointMin = parseAllElements(selection, 100000, 100000, false);
-	//console.log("## x=" + pointMin.x + " | y=" + pointMin.y + " | " + pointMin.selection);
+	var pointMin = parseAllElements(selection, null, null, false);
 	var finalSelection = parseAllElements(selection, pointMin.x, pointMin.y, true);
 
 	return selection.innerHTML;
