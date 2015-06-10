@@ -30,8 +30,8 @@ function onChangeSvgCode (ev) {
 
 function clickHandler(e){
 	var target = e.target.parentNode;
+	target.removeAttribute('opacity');
 	var newElement = target.cloneNode(true);
-	newElement.setAttribute('opacity', '1');
 	selectionSvgOutput.appendChild(newElement);
 
 	// console.log("clickHandler:" + target);
@@ -211,17 +211,6 @@ function parseAllElements(selection, mX, mY, change){
 		}
 	};
 
-	// if (change === true){
-	// 	console.log("*** change ***");
-	// } else {
-	// 	console.log("XXX not change XXX");
-	// }
-
-	//	console.log(">> minX: " + minX + " | minY: " + minY);
-
-	// testeSVG.children[0].children[0].points
-	// nodeName
-
 	return {x:minX, y:minY, selection:selection};
 }
 
@@ -234,22 +223,6 @@ function otimizeSVG(selection){
 	var pointMin = parseAllElements(selection, 100000, 100000, false);
 	//console.log("## x=" + pointMin.x + " | y=" + pointMin.y + " | " + pointMin.selection);
 	var finalSelection = parseAllElements(selection, pointMin.x, pointMin.y, true);
-	// polygon 		points="797,110.336 777,121.671
-	// path			d="M582.259,293.113c-0.614,0.088-1.228
-	// rect			x="727" y="52"
-	// text 		transform="matrix(1 0 0 1 823 114.8848)"
 
 	return selection.innerHTML;
 }
-
-// function addMouseEvents (){
-// 	originalSvgOutput.querySelectorAll
-// 	$("g").each(function() {
-// 		console.log(this);
-// 		var group = this;
-// 		group.on("mouseover", function() {
-// 			console.log("mouseover");
-// 		});
-// 	    //$("#list").append("<option>" + this.id + "</option>");
-// 	});
-// }
