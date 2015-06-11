@@ -1,34 +1,57 @@
-h3 {
-	width: auto;
+.container {
+	display: flex;
+	margin-top: 20px;
 }
 
-#originalSvgCode{
+input[type=checkbox] {
+	margin: 12px 2px 0 0 !important;
+}
+
+label {
+	background-color: #f4f4f4;
+	padding: 5px 10px;
+	border-radius: 5px;
+	margin-right: 10px;
+}
+
+.button-right {
+	float: right;
+}
+
+.button {
+	margin-right: 10px;
+}
+
+.box {
+	width: 100%;
+}
+
+#optimizationSvgCode {
+	width: 100%;
+	height: 500px;
+}
+
+.textArea {
 	width: 100%;
 	height: 100px;
 	font-size: 10px;
 }
 
-#originalSvgContainer {
-	float: left;
-	width: 50%;
-	height: 500px;
-	overflow: auto;
+.borderBox {
 	border: 5px solid #cccccc;
-}
-
-#selectionSvgContainer{
-
-	width: 50%;
-	height: 500px;
-	overflow: auto;
-	border: 5px solid #cccccc;
-}
-
-#optimizationSvgContainer{
 	width: 100%;
 	height: 500px;
 	overflow: auto;
-	border: 5px solid #cccccc;
+}
+
+.shape {
+  stroke-width: 1px;
+  stroke: #19f6e8;
+  border: 5px solid black;
+}
+
+#originalSvgCode{
+	
 }
 
 #originalSvgOutput{

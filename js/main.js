@@ -1,8 +1,29 @@
+var minX;
+var minY;
+
 originalSvgCode.addEventListener('input', onChangeSvgCode);
 
 originalSvgContainer.addEventListener("scroll", onScrollOriginal);
 selectionSvgContainer.addEventListener("scroll", onScrollSelection);
 
+clearSelection.addEventListener("click", onClearSelection);
+
+checkboxPosition.addEventListener("change", onChangePositionCheckbox);
+
+checkboxBorder.addEventListener("change", onChangeBorderCheckbox);
+
+function onChangeBorderCheckbox (ev){
+	otimizeSelection();
+}
+
+function onChangePositionCheckbox (ev){
+	otimizeSelection();
+}
+
+function onClearSelection (ev){
+	selectionSvgContainer.innerHTML = '<svg id="selectionSvgOutput" width="1600" height="1000"></svg>'; 
+	optimizationSvgContainer.innerHTML = '<svg id="optimizationSvgOutput" width="1600" height="1000"></svg>'; 
+}
 
 function onScrollSelection (ev){
 	originalSvgContainer.scrollTop = selectionSvgContainer.scrollTop;
@@ -19,17 +40,29 @@ function onChangeSvgCode (ev) {
 	// console.log("originalSvgCode: " + originalSvgCode.value);
 	// console.log("originalSvgOutput: " + originalSvgOutput.innerHTML);
 
-	var groups = originalSvgOutput.querySelectorAll('g');
+	//var groups = originalSvgOutput.querySelectorAll('g');
 
-	originalSvgOutput.addEventListener("click", clickHandler);
-	originalSvgOutput.addEventListener("mouseover", overHandler);
-	originalSvgOutput.addEventListener("mouseout", outHandler);
-
-	
+	originalSvgOutput.addEventListener("click", clickOriginalSvgHandler);
+	originalSvgOutput.addEventListener("mouseover", overOriginalSvgHandler);
+	originalSvgOutput.addEventListener("mouseout", outOriginalSvgHandler);
 }
 
-function clickHandler(e){
-	var target = e.target.parentNode;
+function overOriginalSvgHandler(e){
+	var target = getSelectionTarget(e);
+	target.setAttribute('opacity', '0.5');
+}
+
+function outOriginalSvgHandler(e){
+	var target = getSelectionTarget(e);
+	target.removeAttribute('opacity');
+}
+
+function clickOriginalSvgHandler(e){
+	minX = 100000;
+	minY = 100000;
+
+	var target = getSelectionTarget(e);
+
 	target.removeAttribute('opacity');
 	var newElement = target.cloneNode(true);
 	selectionSvgOutput.appendChild(newElement);
@@ -43,41 +76,68 @@ function clickHandler(e){
 	// console.log(">> " + optimizationSvgOutput.firstChild);
 	// console.log(">>> " + optimizationSvgOutput.firstElementChild);
 
-	optimizationSvgOutput.removeChild(optimizationSvgOutput.firstChild);
-
-	//otimizeSVG
-	optimizationSvgOutput.innerHTML = otimizeSVG(selectionSvgOutput.cloneNode(true));
-}
-
-function overHandler(e){
-	var target = e.target.parentNode;
-	target.setAttribute('opacity', '0.5');
-	// console.log("overHandler:" + target);
-}
-
-function outHandler(e){
-	var target = e.target.parentNode;
-	target.removeAttribute('opacity');
-	// console.log("outHandler:" + target);
-}
-
-var minX = 100000;
-var minY = 100000;
-
-function parseAllElements(selection, mX, mY, change){
-	if (this.minX < mX ){
-		this.minX = mX;
+	if (optimizationSvgOutput.firstChild != null){
+		optimizationSvgOutput.removeChild(optimizationSvgOutput.firstChild);
 	}
 
-	if (this.minY < mY ){
-		this.minY = mY;
+//otimizeSVG
+	
+	otimizeSelection();
+
+	// var c = document.getElementById('canvas');
+	// var ctx = c.getContext('2d');
+	// ctx.drawSvg('<svg>'+otimizedSVG+'</svg>');
+
+	// canvg('canvas', '<svg>'+otimizedSVG+'</svg>',
+	// 	{
+	// 		// ignoreMouse: true,
+	// 		// ignoreAnimation: true,
+	// 		ignoreDimensions: true,
+	// 		offsetX: 50,
+	// 		log: true
+	// 	});
+	//render('<svg>'+otimizedSVG+'</svg>');
+}
+
+function otimizeSelection(){
+	var otimizedSVG = otimizeSVG(selectionSvgOutput.cloneNode(true));
+	optimizationSvgOutput.innerHTML = otimizedSVG;
+	optimizationSvgCode.value = otimizedSVG;
+
+	if (checkboxBorder.checked){
+		optimizationSvgOutput.children[0].setAttribute("class","shape");
+	} else {
+		optimizationSvgOutput.children[0].setAttribute("class","");
+	}
+}
+
+function render(svg, width, height) {
+
+// new jsCanvas (objectname, [width, height]);
+
+	document.createElement('canvas')
+	var c = document.createElement('canvas');		
+	c.width = width || 1000;
+	c.height = height || 500;
+	document.getElementById('canvas').innerHTML = '';
+	document.getElementById('canvas').appendChild(c);
+	
+	canvg(c, svg);
+}
+
+function parseAllElements(selection, mX, mY, change){
+	if (minX < mX ){
+		minX = mX;
+	}
+
+	if (minY < mY ){
+		minY = mY;
 	}
 
 	var xItem;
 	var yItem; 
 
 	var i;
-	var j;
 	var item;
 
 	for (i = 0; i < selection.childElementCount; i++) {
@@ -113,12 +173,12 @@ function parsePolylineOrPolygon (item, mX, mY, change){
 		xItem = parseFloat(point.x);
 		yItem = parseFloat(point.y);
 
-		if (xItem < this.minX) {
-			this.minX = xItem;
+		if (xItem < minX) {
+			minX = xItem;
 		}
 
-		if (yItem < this.minY) {
-			this.minY = yItem;
+		if (yItem < minY) {
+			minY = yItem;
 		}
 
 		if (change){
@@ -134,12 +194,12 @@ function parseText (item, mX, mY, change){
 	xItem = matrix["e"];
 	yItem = matrix["f"];
 
-	if (xItem < this.minX) {
-		this.minX = xItem;
+	if (xItem < minX) {
+		minX = xItem;
 	}
 
-	if (yItem < this.minY) {
-		this.minY = yItem;
+	if (yItem < minY) {
+		minY = yItem;
 	}
 
 	if (change){
@@ -147,20 +207,22 @@ function parseText (item, mX, mY, change){
 	}
 } 
 
+
+
 function parseCircle (item, mX, mY, change){
-	var cxItem = parseFloat(item.getAttribute("cx"));
-	var cyItem = parseFloat(item.getAttribute("cy"));	
-	var rItem = parseFloat(item.getAttribute("r"));
+	var cxItem = getFloatAttribute(item, "cx");
+	var cyItem = getFloatAttribute(item, "cy");
+	var rItem = getFloatAttribute(item, "r");
 
 	cxItem = cxItem - (rItem/2);
 	cyItem = cyItem - (rItem/2);
 
-	if (cxItem < this.minX) {
-		this.minX = cxItem;
+	if (cxItem < minX) {
+		minX = cxItem;
 	}
 
-	if (cyItem < this.minY) {
-		this.minY = cyItem;
+	if (cyItem < minY) {
+		minY = cyItem;
 	}
 
 	if (change){
@@ -178,12 +240,12 @@ function parseEllipse (item, mX, mY, change){
 	cxItem = cxItem - (rxItem/2);
 	cyItem = cyItem - (ryItem/2);
 
-	if (cxItem < this.minX) {
-		this.minX = cxItem;
+	if (cxItem < minX) {
+		minX = cxItem;
 	}
 
-	if (cyItem < this.minY) {
-		this.minY = cyItem;
+	if (cyItem < minY) {
+		minY = cyItem;
 	}
 
 	if (change){
@@ -211,12 +273,12 @@ function parseRect (item, mX, mY, change){
 	xItem = parseFloat(item.getAttribute("x"));
 	yItem = parseFloat(item.getAttribute("y"));
 
-	if (xItem < this.minX) {
-		this.minX = xItem;
+	if (xItem < minX) {
+		minX = xItem;
 	}
 
-	if (yItem < this.minY) {
-		this.minY = yItem;
+	if (yItem < minY) {
+		minY = yItem;
 	}
 
 	if (change){
@@ -225,10 +287,30 @@ function parseRect (item, mX, mY, change){
 	}
 }
 
-function otimizeSVG(selection){
+function getFloatAttribute(item, attr){
+	return parseFloat(item.getAttribute(attr));
+}
 
+function setFloatAttribute(item, attr, value){
+	item.setAttribute(attr, value);
+}
+
+function getSelectionTarget (e) {
+	var target = e.target;
+
+	if (checkboxGroup.checked){
+		target = target.parentNode;
+	}
+
+	return target;
+}
+
+function otimizeSVG(selection){
 	var pointMin = parseAllElements(selection, null, null, false);
-	var finalSelection = parseAllElements(selection, pointMin.x, pointMin.y, true);
+
+	if (checkboxPosition.checked){
+		var finalSelection = parseAllElements(selection, pointMin.x, pointMin.y, true);
+	}
 
 	return selection.innerHTML;
 }
