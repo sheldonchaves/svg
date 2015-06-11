@@ -1,16 +1,20 @@
 var minX;
 var minY;
 
-originalSvgCode.addEventListener('input', onChangeSvgCode);
+function configureListeners () {
+	originalSvgCode.addEventListener('input', onChangeSvgCode);
 
-originalSvgContainer.addEventListener("scroll", onScrollOriginal);
-selectionSvgContainer.addEventListener("scroll", onScrollSelection);
+	originalSvgContainer.addEventListener("scroll", onScrollOriginal);
+	selectionSvgContainer.addEventListener("scroll", onScrollSelection);
 
-clearSelection.addEventListener("click", onClearSelection);
+	clearSelection.addEventListener("click", onClearSelection);
 
-checkboxPosition.addEventListener("change", onChangePositionCheckbox);
+	checkboxPosition.addEventListener("change", onChangePositionCheckbox);
 
-checkboxBorder.addEventListener("change", onChangeBorderCheckbox);
+	checkboxBorder.addEventListener("change", onChangeBorderCheckbox);
+}
+
+configureListeners ();
 
 function onChangeBorderCheckbox (ev){
 	otimizeSelection();
@@ -37,10 +41,6 @@ function onScrollOriginal (ev){
 
 function onChangeSvgCode (ev) {
 	originalSvgOutput.innerHTML = originalSvgCode.value;
-	// console.log("originalSvgCode: " + originalSvgCode.value);
-	// console.log("originalSvgOutput: " + originalSvgOutput.innerHTML);
-
-	//var groups = originalSvgOutput.querySelectorAll('g');
 
 	originalSvgOutput.addEventListener("click", clickOriginalSvgHandler);
 	originalSvgOutput.addEventListener("mouseover", overOriginalSvgHandler);
@@ -67,36 +67,13 @@ function clickOriginalSvgHandler(e){
 	var newElement = target.cloneNode(true);
 	selectionSvgOutput.appendChild(newElement);
 
-	// console.log("clickHandler:" + target);
-	// console.log("clickHandler.parentNode:" + target.parentNode);
-	// console.log("clickHandler:" + target);
-
 	var selectionSVG = selectionSvgOutput.cloneNode(true);
-
-	// console.log(">> " + optimizationSvgOutput.firstChild);
-	// console.log(">>> " + optimizationSvgOutput.firstElementChild);
 
 	if (optimizationSvgOutput.firstChild != null){
 		optimizationSvgOutput.removeChild(optimizationSvgOutput.firstChild);
 	}
-
-//otimizeSVG
 	
 	otimizeSelection();
-
-	// var c = document.getElementById('canvas');
-	// var ctx = c.getContext('2d');
-	// ctx.drawSvg('<svg>'+otimizedSVG+'</svg>');
-
-	// canvg('canvas', '<svg>'+otimizedSVG+'</svg>',
-	// 	{
-	// 		// ignoreMouse: true,
-	// 		// ignoreAnimation: true,
-	// 		ignoreDimensions: true,
-	// 		offsetX: 50,
-	// 		log: true
-	// 	});
-	//render('<svg>'+otimizedSVG+'</svg>');
 }
 
 function otimizeSelection(){
@@ -112,8 +89,6 @@ function otimizeSelection(){
 }
 
 function render(svg, width, height) {
-
-// new jsCanvas (objectname, [width, height]);
 
 	document.createElement('canvas')
 	var c = document.createElement('canvas');		
