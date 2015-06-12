@@ -5,16 +5,30 @@ function configureListeners () {
 	originalSvgCode.addEventListener('input', onChangeSvgCode);
 
 	originalSvgContainer.addEventListener("scroll", onScrollOriginal);
+
 	selectionSvgContainer.addEventListener("scroll", onScrollSelection);
 
 	clearSelection.addEventListener("click", onClearSelection);
 
+	selectAll.addEventListener("click", onSelectionAll);
+
 	checkboxPosition.addEventListener("change", onChangePositionCheckbox);
 
 	checkboxBorder.addEventListener("change", onChangeBorderCheckbox);
+
+	checkboxParseInt.addEventListener("change", onChangeParseIntCheckbox);
 }
 
 configureListeners ();
+
+function onSelectionAll (ev){
+	clearAll();
+	addInSelection(originalSvgOutput);
+}
+
+function onChangeParseIntCheckbox (ev){
+	otimizeSelection();
+}
 
 function onChangeBorderCheckbox (ev){
 	otimizeSelection();
@@ -25,8 +39,7 @@ function onChangePositionCheckbox (ev){
 }
 
 function onClearSelection (ev){
-	selectionSvgContainer.innerHTML = '<svg id="selectionSvgOutput" width="1600" height="1000"></svg>'; 
-	optimizationSvgContainer.innerHTML = '<svg id="optimizationSvgOutput" width="1600" height="1000"></svg>'; 
+	clearAll();
 }
 
 function onScrollSelection (ev){
@@ -42,9 +55,23 @@ function onScrollOriginal (ev){
 function onChangeSvgCode (ev) {
 	originalSvgOutput.innerHTML = originalSvgCode.value;
 
+	// var bBox = originalSvgOutput.getBBox();
+
+	// originalSvgOutput.setAttribute("width",bBox.width);
+	// originalSvgOutput.setAttribute("height",bBox.height);
+
+	// selectionSvgOutput.setAttribute("width",bBox.width);
+	// selectionSvgOutput.setAttribute("height",bBox.height);
+
+
 	originalSvgOutput.addEventListener("click", clickOriginalSvgHandler);
 	originalSvgOutput.addEventListener("mouseover", overOriginalSvgHandler);
 	originalSvgOutput.addEventListener("mouseout", outOriginalSvgHandler);
+}
+
+function  clearAll() {
+	selectionSvgContainer.innerHTML = '<svg id="selectionSvgOutput" width="1600" height="1000"></svg>'; 
+	optimizationSvgContainer.innerHTML = '<svg id="optimizationSvgOutput" width="1600" height="1000"></svg>'; 
 }
 
 function overOriginalSvgHandler(e){
@@ -58,10 +85,13 @@ function outOriginalSvgHandler(e){
 }
 
 function clickOriginalSvgHandler(e){
+	var target = getSelectionTarget(e);
+	addInSelection(target);
+}
+
+function addInSelection(target) {
 	minX = 100000;
 	minY = 100000;
-
-	var target = getSelectionTarget(e);
 
 	target.removeAttribute('opacity');
 	var newElement = target.cloneNode(true);
@@ -76,8 +106,9 @@ function clickOriginalSvgHandler(e){
 	otimizeSelection();
 }
 
+
 function otimizeSelection(){
-	var otimizedSVG = otimizeSVG(selectionSvgOutput.cloneNode(true));
+	var otimizedSVG = optimizeSVG(selectionSvgOutput.cloneNode(true));
 	optimizationSvgOutput.innerHTML = otimizedSVG;
 	optimizationSvgCode.value = otimizedSVG;
 
@@ -86,18 +117,44 @@ function otimizeSelection(){
 	} else {
 		optimizationSvgOutput.children[0].setAttribute("class","");
 	}
+
+	var bBox = optimizationSvgOutput.getBBox();
+
+	optimizationSvgOutput.setAttribute("width",bBox.width);
+	optimizationSvgOutput.setAttribute("height",bBox.height);
+
+	// console.log("bBox.width: " + bBox.width);
+	// console.log("bBox.height: " + bBox.height);
+
+	render(otimizedSVG, bBox.width, bBox.height);
+
+
+}
+
+
+function optimizeSVG(selection){
+
+	if (checkboxPosition.checked){
+		var pointMin = parseAllElements(selection, null, null, false);
+		var finalSelection = parseAllElements(selection, pointMin.x, pointMin.y, true);
+	}
+
+	return selection.innerHTML;
 }
 
 function render(svg, width, height) {
 
-	document.createElement('canvas')
-	var c = document.createElement('canvas');		
-	c.width = width || 1000;
-	c.height = height || 500;
-	document.getElementById('canvas').innerHTML = '';
-	document.getElementById('canvas').appendChild(c);
+	var canvasContainer = document.getElementById("canvasContainer");
+
+	var canvas = document.createElement('canvas');
+
+	canvas.setAttribute("width", width);
+	canvas.setAttribute("height", height);
+
+	canvasContainer.innerHTML = '';
+	canvasContainer.appendChild(canvas);
 	
-	canvg(c, svg);
+	canvg(canvas, svg);
 }
 
 function parseAllElements(selection, mX, mY, change){
@@ -108,6 +165,9 @@ function parseAllElements(selection, mX, mY, change){
 	if (minY < mY ){
 		minY = mY;
 	}
+
+	minX = optimizeNumber(minX);
+	minY = optimizeNumber(minY);
 
 	var xItem;
 	var yItem; 
@@ -130,7 +190,7 @@ function parseAllElements(selection, mX, mY, change){
 			parsePath (item, mX, mY, change);
 		} else if (item.nodeName === "rect") {
 			parseRect (item, mX, mY, change);
-		} else if (item.nodeName === "g") {
+		} else if (item.nodeName === "g" || item.nodeName === "svg") {
 			parseAllElements(item, minX, minY, change);
 		} else {
 			console.log("NO NODE NAME (item.nodeName): " + item.nodeName);
@@ -141,12 +201,14 @@ function parseAllElements(selection, mX, mY, change){
 }
 
 function parsePolylineOrPolygon (item, mX, mY, change){
+	var j;
+
 	for (j = 0; j < item.points.length; j++){
 
 		var point = item.points[j];
 
-		xItem = parseFloat(point.x);
-		yItem = parseFloat(point.y);
+		xItem = optimizeNumber(point.x);
+		yItem = optimizeNumber(point.y);
 
 		if (xItem < minX) {
 			minX = xItem;
@@ -157,8 +219,10 @@ function parsePolylineOrPolygon (item, mX, mY, change){
 		}
 
 		if (change){
-			point.x = point.x - mX;
-			point.y = point.y - mY;
+			var newX = optimizeNumber(point.x - mX);
+			var newY = optimizeNumber(point.y - mY);
+			point.x = newX;
+			point.y = newY;
 		}
 	}
 }
@@ -166,8 +230,8 @@ function parsePolylineOrPolygon (item, mX, mY, change){
 function parseText (item, mX, mY, change){
 	var matrix = item.getCTM();
 
-	xItem = matrix["e"];
-	yItem = matrix["f"];
+	xItem = optimizeNumber(matrix["e"]);
+	yItem = optimizeNumber(matrix["f"]);
 
 	if (xItem < minX) {
 		minX = xItem;
@@ -182,15 +246,13 @@ function parseText (item, mX, mY, change){
 	}
 } 
 
-
-
 function parseCircle (item, mX, mY, change){
 	var cxItem = getFloatAttribute(item, "cx");
 	var cyItem = getFloatAttribute(item, "cy");
 	var rItem = getFloatAttribute(item, "r");
 
-	cxItem = cxItem - (rItem/2);
-	cyItem = cyItem - (rItem/2);
+	cxItem = optimizeNumber(cxItem - (rItem/2));
+	cyItem = optimizeNumber(cyItem - (rItem/2));
 
 	if (cxItem < minX) {
 		minX = cxItem;
@@ -201,19 +263,20 @@ function parseCircle (item, mX, mY, change){
 	}
 
 	if (change){
-		item.setAttribute("cx", parseFloat(item.getAttribute("cx")) - mX);
-		item.setAttribute("cy", parseFloat(item.getAttribute("cy")) - mY);
+		item.setAttribute("cx", getFloatAttribute(item, "cx") - mX);
+		item.setAttribute("cy", getFloatAttribute(item, "cy") - mY);
+		item.setAttribute("r", optimizeNumber(rItem));
 	}
 }
 
 function parseEllipse (item, mX, mY, change){
-	var cxItem = parseFloat(item.getAttribute("cx"));
-	var cyItem = parseFloat(item.getAttribute("cy"));	
-	var rxItem = parseFloat(item.getAttribute("rx"));
-	var ryItem = parseFloat(item.getAttribute("ry"));
+	var cxItem = getFloatAttribute(item, "cx");
+	var cyItem = getFloatAttribute(item, "cy");	
+	var rxItem = getFloatAttribute(item, "rx");
+	var ryItem = getFloatAttribute(item, "ry");
 
-	cxItem = cxItem - (rxItem/2);
-	cyItem = cyItem - (ryItem/2);
+	cxItem = optimizeNumber(cxItem - (rxItem/2));
+	cyItem = optimizeNumber(cyItem - (ryItem/2));
 
 	if (cxItem < minX) {
 		minX = cxItem;
@@ -224,8 +287,10 @@ function parseEllipse (item, mX, mY, change){
 	}
 
 	if (change){
-		item.setAttribute("cx", parseFloat(item.getAttribute("cx")) - mX);
-		item.setAttribute("cy", parseFloat(item.getAttribute("cy")) - mY);
+		item.setAttribute("cx", getFloatAttribute(item, "cx") - mX);
+		item.setAttribute("cy", getFloatAttribute(item, "cy") - mY);
+		item.setAttribute("rx", optimizeNumber(rxItem));
+		item.setAttribute("ry", optimizeNumber(ryItem));
 	}
 }
 
@@ -235,39 +300,68 @@ function parsePath (item, mX, mY, change){
 		var point = item.pathSegList[j];
 		var letter = point.pathSegTypeAsLetter
 
+		// if (letter === "M") {
 		if (letter === "M" || letter === "L") {
-			if (change){
-				point.x = point.x - mX;
-				point.y = point.y - mY;
+
+			if (point.x < minX) {
+				minX = point.x;
 			}
-		}
+
+			if (point.y < minY) {
+				minY = point.y;
+			}
+
+			if (change){
+				point.x = optimizeNumber(point.x - mX);
+				point.y = optimizeNumber(point.y - mY);
+			}
+		}	
 	}
 }
 
 function parseRect (item, mX, mY, change){
-	xItem = parseFloat(item.getAttribute("x"));
-	yItem = parseFloat(item.getAttribute("y"));
+	if (item.hasAttribute("x")){
+		xItem = getFloatAttribute(item, "x");
 
-	if (xItem < minX) {
-		minX = xItem;
+		if (xItem < minX) {
+			minX = xItem;
+		}
+
+		if (change){
+			item.setAttribute("x", optimizeNumber(xItem - mX));
+		}
 	}
+	
+	if (item.hasAttribute("y")){
+		yItem = getFloatAttribute(item, "y");	
 
-	if (yItem < minY) {
-		minY = yItem;
-	}
+		if (yItem < minY) {
+			minY = yItem;
+		}
 
-	if (change){
-		item.setAttribute("x", parseFloat(item.getAttribute("x")) - mX);
-		item.setAttribute("y", parseFloat(item.getAttribute("y")) - mY);
+		if (change){
+			item.setAttribute("y", optimizeNumber(yItem - mY));
+		}
 	}
 }
 
 function getFloatAttribute(item, attr){
-	return parseFloat(item.getAttribute(attr));
+	if (item.hasAttribute(attr)){
+		var value = parseFloat(item.getAttribute(attr));
+		return optimizeNumber(value);
+	}
+	return 0;
 }
 
-function setFloatAttribute(item, attr, value){
-	item.setAttribute(attr, value);
+function optimizeNumber(n){
+
+	n = parseInt(n*10)/10;
+
+	if (checkboxParseInt.checked){
+		n = parseInt(n);
+	}
+	
+	return n;
 }
 
 function getSelectionTarget (e) {
@@ -278,14 +372,4 @@ function getSelectionTarget (e) {
 	}
 
 	return target;
-}
-
-function otimizeSVG(selection){
-	var pointMin = parseAllElements(selection, null, null, false);
-
-	if (checkboxPosition.checked){
-		var finalSelection = parseAllElements(selection, pointMin.x, pointMin.y, true);
-	}
-
-	return selection.innerHTML;
 }

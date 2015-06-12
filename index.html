@@ -31,8 +31,12 @@
 
   <section class="main-content"> 
 
+    <h3>Supported tags</h3>
+    <pre><code>//optimized to convert Adobe illustrator svgs
+    svg, g, polyline, text, circle, ellipse, path, rect</code></pre>
+
     <h3>Paste Svg Code</h3>
-    <textarea class="textArea" id="originalSvgCode"></textarea>
+    <textarea class="textArea textBox" id="originalSvgCode"></textarea>
 
     <div class="container">
       <div class="box">
@@ -42,6 +46,7 @@
 
           </svg>
         </div>
+        <button class="button-right" id="selectAll">Select All</button>
       </div>
 
       <div class="box">
@@ -54,33 +59,44 @@
     </div>
 
     <div class="container">
-      <input type="checkbox" id="checkboxGroup" name="checkboxGroup" checked="true">
-      <label for="checkboxGroup">Only select Groups</label>
-
-      <input type="checkbox" id="checkboxPosition" name="checkboxPosition" checked="true">
-      <label for="checkboxPosition">Position Absolute to Relative</label>
-
-      <input type="checkbox" id="checkboxBorder" name="checkboxBorder">
-      <label for="checkboxBorder">Preview result with border</label>
+      <h5>Options: </h5>
+      <ul>
+        <li>
+          <input type="checkbox" id="checkboxGroup" name="checkboxGroup" checked="true">
+          <label for="checkboxGroup">Only select Groups</label>
+        </li>
+        <li>
+          <input type="checkbox" id="checkboxPosition" name="checkboxPosition" checked="true">
+          <label for="checkboxPosition">Position Absolute to Relative</label>
+        </li>
+        <li>
+          <input type="checkbox" id="checkboxBorder" name="checkboxBorder">
+          <label for="checkboxBorder">Preview result with border</label>
+        </li>
+        <li>
+          <input type="checkbox" id="checkboxParseInt" name="checkboxParseInt">
+          <label for="checkboxParseInt">ParseInt numbers</label>
+        </li>
+      </ul>
     </div>
 
     <div class="container">
       <div class="box">
         <h3>Svg optimization</h3>
         <div class="borderBox" id="optimizationSvgContainer" >
-          <svg id="optimizationSvgOutput" width="1600" height="1000"></svg>
+          <svg id="optimizationSvgOutput"></svg>
         </div>
       </div>
       <div class="box">
         <h3>Svg optimization code</h3>
         <div  id="svgOptimizationCode" >
-           <textarea class="textArea" id="optimizationSvgCode"></textarea>
+           <textarea class="textArea borderBox" id="optimizationSvgCode"></textarea>
         </div>
       </div>
     </div>
 
     <h3>Canvas Selection</h3>
-    <div class="borderBox" id="canvas"></div>
+    <div class="borderBox" id="canvasContainer"></div>
 
     <h3>Canvas output</h3>
     <div class="borderBox" id="canvasOutput"></div>
