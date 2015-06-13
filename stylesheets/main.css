@@ -1,3 +1,8 @@
+@font-face {
+  font-family: "Aller";
+  src: url("../fonts/Aller_Rg.ttf");
+}
+
 .container {
 	display: flex;
 	margin-top: 20px;

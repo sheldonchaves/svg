@@ -126,9 +126,19 @@ function otimizeSelection(){
 	// console.log("bBox.width: " + bBox.width);
 	// console.log("bBox.height: " + bBox.height);
 
-	render(otimizedSVG, bBox.width, bBox.height);
+	renderCanvg(otimizedSVG, bBox.width, bBox.height);
 
 
+	// var teste = "var rectangle = new PIXI.Graphics();" + "\n"
+	// // +"rectangle.lineStyle(4, 0xFF3300, 1);" + "\n"
+	// +"rectangle.beginFill(0x66CCFF);" + "\n"
+	// +"rectangle.drawRect(0, 0, 64, 64);" + "\n"
+	// +"rectangle.endFill();" + "\n"
+	// +"rectangle.x = 170;" + "\n"
+	// +"rectangle.y = 170;" + "\n"
+	// +"stage.addChild(rectangle);";
+
+	// renderPixi(teste, bBox.width, bBox.height);
 }
 
 
@@ -142,7 +152,7 @@ function optimizeSVG(selection){
 	return selection.innerHTML;
 }
 
-function render(svg, width, height) {
+function renderCanvg(svg, width, height) {
 
 	var canvasContainer = document.getElementById("canvasContainer");
 
@@ -225,9 +235,17 @@ function parsePolylineOrPolygon (item, mX, mY, change){
 			point.y = newY;
 		}
 	}
+
+	if (change){
+		renderPixi(drawPixiPolylineOrPolygon(item));
+	}
 }
 
+var texto;
+
 function parseText (item, mX, mY, change){
+	this.texto = item;
+
 	var matrix = item.getCTM();
 
 	xItem = optimizeNumber(matrix["e"]);
@@ -243,6 +261,10 @@ function parseText (item, mX, mY, change){
 
 	if (change){
 		item.setAttribute("transform", "matrix("+matrix["a"] + " " +matrix["b"] + " " + matrix["c"] + " " + matrix["d"] + " " + (xItem - mX) + " " + (yItem - mY) + ")");
+	}
+
+	if (change){
+		renderPixi(drawPixiText(item));
 	}
 } 
 
@@ -266,6 +288,10 @@ function parseCircle (item, mX, mY, change){
 		item.setAttribute("cx", getFloatAttribute(item, "cx") - mX);
 		item.setAttribute("cy", getFloatAttribute(item, "cy") - mY);
 		item.setAttribute("r", optimizeNumber(rItem));
+	}
+
+	if (change){
+		renderPixi(drawPixiCircle(item));
 	}
 }
 
@@ -342,6 +368,10 @@ function parseRect (item, mX, mY, change){
 		if (change){
 			item.setAttribute("y", optimizeNumber(yItem - mY));
 		}
+	}
+
+	if (change){
+		renderPixi(drawPixiRect(item));
 	}
 }
 
