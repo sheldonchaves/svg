@@ -19,11 +19,13 @@
 
   <script type="text/javascript" src="lib/pixi.min.js"></script>
 
-  <!--<script type="text/javascript" src="http://gabelerner.github.io/canvg/rgbcolor.js"></script> 
-  <script type="text/javascript" src="http://gabelerner.github.io/canvg/StackBlur.js"></script>
-  <script type="text/javascript" src="http://gabelerner.github.io/canvg/canvg.js"></script> 
 
-  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script> -->
+
+<!--<script type="text/javascript" src="http://gabelerner.github.io/canvg/rgbcolor.js"></script> 
+<script type="text/javascript" src="http://gabelerner.github.io/canvg/StackBlur.js"></script>
+<script type="text/javascript" src="http://gabelerner.github.io/canvg/canvg.js"></script> 
+
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script> -->
 
 </head>
 <body>
@@ -35,100 +37,104 @@
 
     <h3>Supported tags</h3>
     <pre><code>//optimized to convert Adobe illustrator svgs
-    svg, g, polyline, text, circle, ellipse, path, rect</code></pre>
+      svg, g, polyline, text, circle, ellipse, path, rect</code></pre>
 
-    <h3>Paste Svg Code</h3>
-    <textarea class="textArea textBox" id="originalSvgCode"></textarea>
+      <h3>Paste Svg Code</h3>
+      <textarea class="text-area text-box" id="originalSvgCode"></textarea>
 
-    <div class="container">
-      <div class="box">
-        <h3>Svg Draw Output</h3>
-        <div class="borderBox" id="originalSvgContainer" >
-          <svg id="originalSvgOutput" width="1600" height="1000">
+      <div class="container">
+        <div class="box">
+          <h3>Svg Draw Output</h3>
+          <div class="border-box" id="originalSvgContainer" >
+            <svg id="originalSvgOutput" width="1600" height="1000">
 
-          </svg>
+            </svg>
+          </div>
+          <button class="button-right" id="selectAll">Select All</button>
         </div>
-        <button class="button-right" id="selectAll">Select All</button>
-      </div>
 
-      <div class="box">
-        <h3>Svg Draw Selection</h3>
-        <div class="borderBox" id="selectionSvgContainer" >
-          <svg id="selectionSvgOutput" width="1600" height="1000"></svg>
-        </div>
-        <button class="button-right" id="clearSelection">Clear Selection</button>
-      </div>
-    </div>
-
-    <div class="container">
-      <h5>Options: </h5>
-      <ul>
-        <li>
-          <input type="checkbox" id="checkboxGroup" name="checkboxGroup" checked="true">
-          <label for="checkboxGroup">Only select Groups</label>
-        </li>
-        <li>
-          <input type="checkbox" id="checkboxPosition" name="checkboxPosition" checked="true">
-          <label for="checkboxPosition">Position Absolute to Relative</label>
-        </li>
-        <li>
-          <input type="checkbox" id="checkboxBorder" name="checkboxBorder">
-          <label for="checkboxBorder">Preview result with border</label>
-        </li>
-        <li>
-          <input type="checkbox" id="checkboxParseInt" name="checkboxParseInt" checked="true">
-          <label for="checkboxParseInt">ParseInt numbers</label>
-        </li>
-      </ul>
-    </div>
-
-    <div class="container">
-      <div class="box">
-        <h3>Svg optimization</h3>
-        <div class="borderBox" id="optimizationSvgContainer" >
-          <svg id="optimizationSvgOutput"></svg>
+        <div class="box">
+          <h3>Svg Draw Selection</h3>
+          <div class="border-box" id="selectionSvgContainer" >
+            <svg id="selectionSvgOutput" width="1600" height="1000"></svg>
+          </div>
+          <button class="button-right" id="clearSelection">Clear Selection</button>
         </div>
       </div>
-      <div class="box">
-        <h3>Svg optimization code</h3>
-        <div  id="svgOptimizationCode" >
-           <textarea class="textArea borderBox" id="optimizationSvgCode"></textarea>
+
+      <div class="container">
+        <h5>Options: </h5>
+        <ul>
+          <li>
+            <input type="checkbox" id="checkboxGroup" name="checkboxGroup" checked="true">
+            <label for="checkboxGroup">Only select Groups</label>
+          </li>
+          <li>
+            <input type="checkbox" id="checkboxPosition" name="checkboxPosition" checked="true">
+            <label for="checkboxPosition">Position Absolute to Relative</label>
+          </li>
+          <li>
+            <input type="checkbox" id="checkboxBorder" name="checkboxBorder">
+            <label for="checkboxBorder">Preview result with border</label>
+          </li>
+          <li>
+            <input type="checkbox" id="checkboxParseInt" name="checkboxParseInt" checked="true">
+            <label for="checkboxParseInt">ParseInt numbers</label>
+          </li>
+        </ul>
+      </div>
+
+      <div class="container">
+        <div class="box">
+          <h3>Svg optimization</h3>
+          <div class="border-box" id="optimizationSvgContainer" >
+            <svg id="optimizationSvgOutput"></svg>
+          </div>
+        </div>
+        <div class="box">
+          <h3>Svg optimization code</h3>
+          <div  id="svgOptimizationCode" >
+            <textarea class="text-area border-box" id="optimizationSvgCode"></textarea>
+          </div>
         </div>
       </div>
-    </div>
 
-    <h3>Native Canvas Selection</h3>
-    <div class="borderBox" id="canvasContainer"></div>
     <div class="container">
-      <div class="box">
-        <h3>Pixi Output</h3>
-        <div class="borderBox" id="pixiOutput"></div>
+        <textarea class="text-area border-box" id="inlineOptimizationSvgCode"></textarea>
       </div>
-      <div class="box">
-        <h3>Pixi Code</h3>
-        <textarea class="textArea borderBox" id="pixiCode"></textarea>
+
+      <h3>Native Canvas Selection</h3>
+      <div class="border-box" id="canvasContainer"></div>
+      <div class="container">
+        <div class="box">
+          <h3>Pixi Output</h3>
+          <div class="border-box" id="pixiOutput"></div>
+        </div>
+        <div class="box">
+          <h3>Pixi Code</h3>
+          <textarea class="text-area border-box" id="pixiCode"></textarea>
+        </div>
       </div>
-    </div>
 
-  </section>
-  
-</body>
-<script type="text/javascript" src="js/svgToPixi.js"></script> 
-<script type="text/javascript" src="js/main.js"></script> 
+    </section>
 
-<script>
+  </body>
+  <script type="text/javascript" src="js/svgToPixi.js"></script> 
+  <script type="text/javascript" src="js/main.js"></script> 
 
-  if (document.location.hostname != "localhost" && document.location.hostname.length != 0){
-    console.log("init analytics()");
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  <script>
 
-    ga('create', 'UA-512186-19', 'auto');
-    ga('send', 'pageview');
-  }
-</script>
+    if (document.location.hostname != "localhost" && document.location.hostname.length != 0){
+      console.log("init analytics()");
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-</html>
+      ga('create', 'UA-512186-19', 'auto');
+      ga('send', 'pageview');
+    }
+  </script>
+
+  </html>
 

@@ -1,5 +1,7 @@
-var minX;
-var minY;
+var minX,
+	minY,
+	maxW,
+	maxH;
 
 function configureListeners () {
 	originalSvgCode.addEventListener('input', onChangeSvgCode);
@@ -112,6 +114,8 @@ function otimizeSelection(){
 	optimizationSvgOutput.innerHTML = otimizedSVG;
 	optimizationSvgCode.value = otimizedSVG;
 
+	inlineOptimizationSvgCode.value = otimizedSVG.replace(/(\r\n|\n|\r|\t)/gm,"");
+
 	if (checkboxBorder.checked){
 		optimizationSvgOutput.children[0].setAttribute("class","shape");
 	} else {
@@ -168,6 +172,9 @@ function renderCanvg(svg, width, height) {
 }
 
 function parseAllElements(selection, mX, mY, change){
+	minX = optimizeNumber(minX);
+	minY = optimizeNumber(minY);
+
 	if (minX < mX ){
 		minX = mX;
 	}
@@ -176,16 +183,25 @@ function parseAllElements(selection, mX, mY, change){
 		minY = mY;
 	}
 
-	minX = optimizeNumber(minX);
-	minY = optimizeNumber(minY);
+
+	console.log(">> " + JSON.stringify(selection.getBBox()));
+
+
+
 
 	var xItem;
 	var yItem; 
 
+
+	if (selection.childElementCount == 1) {
+		console.log("opa " + selection.nodeName);
+	}
+
 	var i;
 	var item;
+	var totalItems = selection.childElementCount;
 
-	for (i = 0; i < selection.childElementCount; i++) {
+	for (i = 0; i < totalItems; i++) {
 		item = selection.children[i];
 
 		if (item.nodeName === "polyline" || item.nodeName === "polygon") {
@@ -211,11 +227,11 @@ function parseAllElements(selection, mX, mY, change){
 }
 
 function parsePolylineOrPolygon (item, mX, mY, change){
-	var j;
+	var i;
 
-	for (j = 0; j < item.points.length; j++){
+	for (i = 0; i < item.points.length; i++){
 
-		var point = item.points[j];
+		var point = item.points[i];
 
 		xItem = optimizeNumber(point.x);
 		yItem = optimizeNumber(point.y);
@@ -241,10 +257,10 @@ function parsePolylineOrPolygon (item, mX, mY, change){
 	}
 }
 
-var texto;
+
 
 function parseText (item, mX, mY, change){
-	this.texto = item;
+	var texto = item;
 
 	var matrix = item.getCTM();
 
@@ -321,6 +337,12 @@ function parseEllipse (item, mX, mY, change){
 }
 
 function parsePath (item, mX, mY, change){
+	console.log("item.pathSegList: " + item.pathSegList);
+	if (!item.pathSegList) {
+		return;
+	}
+
+
 	for (j = 0; j < item.pathSegList.length; j++){
 
 		var point = item.pathSegList[j];
@@ -368,6 +390,17 @@ function parseRect (item, mX, mY, change){
 		if (change){
 			item.setAttribute("y", optimizeNumber(yItem - mY));
 		}
+	}
+
+	if (item.hasAttribute("width")){
+
+		console.log("### " + getFloatAttribute(item, "width"));
+
+		item.setAttribute("width", optimizeNumber(getFloatAttribute(item, "width")));
+	}
+
+	if (item.hasAttribute("height")){
+		item.setAttribute("height", optimizeNumber(getFloatAttribute(item, "height")));
 	}
 
 	if (change){
